@@ -1,0 +1,170 @@
+#!/bin/bash -e
+
+TOOLS=( setup_homebrew setup_zsh setup_vim setup_rubygems setup_go import_dot_files )
+
+import_dot_files() {
+  touch ~/.hushlogin
+  echo "gem: --no-document --no-user-install" > ~/.gemrc
+  cp files/.gitconfig ~
+  cp files/.tmux.conf ~
+  cp files/.tigrc ~
+  cp files/crap.zsh ~/.oh-my-zsh/custom/
+  cp files/simple.zsh-theme ~/.oh-my-zsh/custom/themes/
+  cp files/righthand.zsh-theme ~/.oh-my-zsh/custom/themes/
+  cp files/rbenv.zsh ~/.oh-my-zsh/custom/
+  cp files/go.zsh ~/.oh-my-zsh/custom/
+  cp files/direnv.zsh ~/.oh-my-zsh/custom/
+  cp files/monochrome.vim ~/.vim/colors/
+  cp files/chalk.vim ~/.vim/colors/
+  cp crypt /usr/local/bin/
+  splice
+}
+
+splice() {
+  sed -i '' "s/$(ag ZSH_THEME ~/.zshrc | cut -d '=' -f 2)/\"righthand\"/g" ~/.zshrc
+  awk -i inplace "{ gsub(/callisto/, \"$(whoami)\") }; { print }" ~/.oh-my-zsh/custom/go.zsh
+  sed -i '' "s/$(ag ^plugins ~/.zshrc | cut -d "(" -f 2 | cut -d ")" -f 1)/git tmux rbenv/g" ~/.zshrc
+  vim -u NONE -c "helptags ~/.vim/bundle/vim-fugitive/doc" -c q # don't know where to put this yet - for now does no harm here
+}
+
+setup_homebrew() {
+  if [ ! -f /usr/local/bin/brew ]; then
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  else
+    brew update && brew upgrade brew-cask && brew cleanup && brew cask cleanup
+  fi
+  brew tap git-duet/tap
+  brew tap nviennot/tmate
+  brew install tig tmux tmate tree ag wget irssi pwgen iftop thefuck coreutils gawk watch dpkg \
+    redis mysql rbenv ruby-build rbenv-gemset npm mysql reattach-to-user-namespace htop ctags
+  brew install homebrew/versions/mongodb26 --with-openssl
+  brew install direnv --HEAD
+  brew install caskroom/cask/brew-cask
+  brew install Caskroom/cask/google-chrome
+  brew cask install virtualbox vagrant vagrant-manager
+
+  mv /opt/homebrew-cask/Caskroom/google-chrome/latest/Google\ Chrome.app /Applications/
+  open -a "Google Chrome" --args --make-default-browser
+
+  brew doctor
+}
+
+setup_zsh() {
+  if [ ! -d ~/.oh-my-zsh ]; then
+    wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O - | sh
+    mkdir ~/.oh-my-zsh/custom/themes
+  fi
+}
+
+setup_vim() {
+  plugins=( roman/golden-ratio
+            rking/ag.vim
+            kien/ctrlp.vim
+            scrooloose/syntastic
+            scrooloose/nerdcommenter
+            ntpeters/vim-better-whitespace
+            fatih/vim-go
+            bling/vim-airline
+            airblade/vim-gitgutter
+            tpope/vim-surround
+            tpope/vim-fugitive
+            scrooloose/nerdtree )
+
+  if [ ! -d ~/.vim/autoload ]; then
+    mkdir -p ~/.vim/autoload ~/.vim/bundle ~/.vim/colors && \
+    curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
+  fi
+
+  for plugin in "${plugins[@]}"; do clone $plugin ~/.vim/bundle/$(echo $plugin | cut -d '/' -f 2); done
+
+  cp files/chalk.vim ~/.vim/colors/
+  cp files/monochrome.vim ~/.vim/colors/
+  cp files/.vimrc ~
+}
+
+clone() {
+  git_repo="$1"
+  download_path="$2"
+  url="https://github.com/${git_repo}.git"
+  vim_repo=$download_path$(echo $git_repo | cut -d '/' -f 2)
+  if [ ! -d $download_path ]; then
+    git clone $url $download_path
+  else
+    if [ -d $vim_repo/.git ]; then
+      pushd $vim_repo
+      git fetch && git merge origin/master
+      popd
+    fi
+  fi
+}
+
+setup_rubygems() {
+  rbenv install 2.2.2 && rbenv shell 2.2.2 && rbenv rehash
+  gems=( pivotal_git_scripts bundler bosh_cli bosh_cli_plugin_micro sinatra rspec )
+  for i in "${gems[@]}"; do gem install $i --no-ri --no-rdoc; done
+}
+
+setup_go() {
+  read -p "version? (leave blank for 1.5.3): " go_version
+  if [[ ! $go_version ]]; then
+    go_version="1.5.3"
+  fi
+  mkdir -p ~/go
+  if [ ! -d ~/go/$go_version ]; then
+    wget https://storage.googleapis.com/golang/go$go_version.darwin-amd64.tar.gz -O - | tar -xzf - -C /usr/local/
+  fi
+}
+
+osx-config() {
+  ./osx_config
+}
+
+install_apps() {
+  ./apps
+}
+
+#
+#
+#
+#
+#
+#
+#
+
+automagic() {
+  echo -e "1: interactive setup - choose which tools you install"
+  echo -e "2: automagic setup - install everything, no questions asked"
+  read -n 1 -s -p "your choice? " choice
+  if [[ $choice == "1" ]]; then
+    echo $choice
+    for i in "${TOOLS[@]}"; do check $i; done
+  elif [[ $choice == "2" ]]; then
+    echo $choice
+    for i in "${TOOLS[@]}"; do $i; done
+    echo "automagic setup completed."
+  fi
+}
+
+check() {
+  read -n 1 -p "$1? (y/n) " choice
+  if [[ $choice == "y" ]]; then
+    echo -e "\n"
+    $1
+    echo -e "\n$1 completed\n"
+  else
+    echo -e "\nskipping step: setup $1\n"
+  fi
+}
+
+self-destruct() {
+  read -n 1 -p "delete this repo? (y/n) " choice
+  if [[ $choice == "y" ]]; then
+    #repo=%(pwd)
+    #cd ..
+    #rm -rf $repo
+    echo -e "\nself-destruct complete\n"
+  fi
+}
+
+automagic
+

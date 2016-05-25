@@ -1,0 +1,82 @@
+#!/bin/bash
+
+delete() {
+  sleep 300
+  rm $1
+}
+
+close_shell() {
+  PID=$(ps -eo pid,start,command | sort -r | grep -m2 zsh | tail -1 | awk '{print $1}')
+  sleep 30
+  kill -9 $PID
+}
+
+encrypt_file() {
+  file="$1"
+  openssl enc -aes-256-cbc -salt -in $file -out $file.enc
+  echo "$file encrypted at $file.enc"
+}
+
+handle_error() {
+  if [[ $(cat /tmp/error_file) =~ "bad decrypt" ]]; then
+    echo "incorrect password"
+  else
+    echo $1
+  fi
+  rm /tmp/error_file
+}
+
+decrypt_file() {
+  file="$1"
+  openssl enc -aes-256-cbc -d -in $file -out ${file%.enc}
+  delete ${file%.enc} &
+  echo "decrypting $OPTARG to temporary file ${file%.enc}"
+  echo "this file will be deleted in 5 minutes"
+}
+
+copy_to_clipboard() {
+  site_id="$1"
+  file=$(ls | grep .enc)
+  read -s -p "decryption passkey: " key
+  openssl enc -aes-256-cbc -d -in $file -k $key | grep $site_id | cut -d ' ' -f 6 | pbcopy
+}
+
+while getopts "e:d:c:" OPTION
+do
+  case $OPTION in
+    e)
+      encrypt_file $OPTARG
+      exit
+      ;;
+    d)
+      decrypt_file $OPTARG
+      exit
+      ;;
+    c)
+      copy_to_clipboard $OPTARG
+      exit
+      ;;
+  esac
+done
+
+if [ -z $OPTARG ]; then
+  read -p "file to decrypt: " file
+  read -p "id: " id
+  read -s -p "decryption passkey: " key
+  if [ -z $file ]; then
+    if [ $(ls| grep .enc | wc -l) -gt 1 ]; then
+      printf "\n\nmore than one encrypted file found:\n\n"
+      ls | grep .enc
+      echo
+      read -p "please specify: " file
+    else
+      file=$(ls | grep .enc)
+    fi
+  fi
+  echo
+  echo
+  result=$(openssl enc -aes-256-cbc -d -in $file -k $key 2>> /tmp/error_file | grep $id)
+  handle_error "${result}"
+  echo
+fi
+

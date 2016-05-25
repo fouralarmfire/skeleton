@@ -1,0 +1,38 @@
+#!/bin/bash
+
+copy_files() {
+  skeleton_dir=~/skeleton/files
+  vim_color_dir=~/.vim/colors
+  zsh_dir=~/.oh-my-zsh/custom
+
+  cp ${skeleton_dir}/.vimrc ~/
+  cp ${skeleton_dir}/.tmux.conf ~/
+  cp ${skeleton_dir}/.gitconfig ~/
+  cp ${skeleton_dir}/.tigrc ~/
+  cp ${skeleton_dir}/chalk.vim ${vim_color_dir}
+  cp ${skeleton_dir}/monochrome.vim ${vim_color_dir}
+  cp ${skeleton_dir}/crap.zsh ${zsh_dir}
+  cp ${skeleton_dir}/go.zsh ${zsh_dir}
+  cp ${skeleton_dir}/direnv.zsh ${zsh_dir}
+  cp ${skeleton_dir}/rbenv.zsh ${zsh_dir}
+  cp ${skeleton_dir}/simple.zsh-theme ${zsh_dir}/themes
+  cp ${skeleton_dir}/righthand.zsh-theme ${zsh_dir}/themes
+  cp ~/skeleton/crypt /usr/local/bin
+}
+
+copy_files
+
+read -n 1 -s -p "commit changes? (y/n) " choice
+if [[ $choice == "y" ]]; then
+  read -p "commit message: " message
+  git add files/
+  git commit -m "${message}"
+  echo
+fi
+
+read -n 1 -s -p "update brew? (y/n)" choice
+if [[ $choice == "y" ]]; then
+  brew doctor
+  brew update
+fi
+
