@@ -123,47 +123,27 @@ install_apps() {
   ./apps
 }
 
-#
-#
-#
-#
-#
-#
-#
-
-automagic() {
-  echo -e "1: interactive setup - choose which tools you install"
-  echo -e "2: automagic setup - install everything, no questions asked"
-  read -n 1 -s -p "your choice? " choice
-  if [[ $choice == "1" ]]; then
-    echo $choice
-    for i in "${TOOLS[@]}"; do check $i; done
-  elif [[ $choice == "2" ]]; then
-    echo $choice
-    for i in "${TOOLS[@]}"; do $i; done
-    echo "automagic setup completed."
-  fi
+work_email() {
+  read -p "enter the username associated with your work github account:" name
+  read -p "enter the email address associated with your work github account:" email
+  sed -i '' "s/WORK_EMAIL/$email/g" ~/.oh-my-zsh/custom/crap.zsh
+  sed -i '' "s/WORK_USERNAME/$name/g" ~/.oh-my-zsh/custom/crap.zsh
 }
 
-check() {
-  read -n 1 -p "$1? (y/n) " choice
-  if [[ $choice == "y" ]]; then
-    echo -e "\n"
-    $1
-    echo -e "\n$1 completed\n"
-  else
-    echo -e "\nskipping step: setup $1\n"
-  fi
+personal_email() {
+  read -p "enter the username associated with your personal github account:" name
+  read -p "enter the email address associated with your personal github account:" email
+  sed -i '' "s/GITHUB_EMAIL/$email/g" ~/.gitconfig
+  sed -i '' "s/GITHUB_USERNAME/$name/g" ~/.gitconfig
 }
 
-self-destruct() {
-  read -n 1 -p "delete this repo? (y/n) " choice
-  if [[ $choice == "y" ]]; then
-    #repo=%(pwd)
-    #cd ..
-    #rm -rf $repo
-    echo -e "\nself-destruct complete\n"
-  fi
+splice() {
+  sed -i '' "s/$(ag ZSH_THEME ~/.zshrc | cut -d '=' -f 2)/\"righthand\"/g" ~/.zshrc
+  awk -i inplace "{ gsub(/callisto/, \"$(whoami)\") }; { print }" ~/.oh-my-zsh/custom/go.zsh
+  sed -i '' "s/$(ag ^plugins ~/.zshrc | cut -d "(" -f 2 | cut -d ")" -f 1)/git tmux rbenv/g" ~/.zshrc
+  vim -u NONE -c "helptags ~/.vim/bundle/vim-fugitive/doc" -c q # don't know where to put this yet - for now does no harm here
+  work_email
+  personal_email
 }
 
 automagic
