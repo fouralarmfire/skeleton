@@ -105,9 +105,9 @@ setup_rubygems() {
 }
 
 setup_go() {
-  read -p "version? (leave blank for 1.5.3): " go_version
+  read -p "version? (leave blank for 1.6.2): " go_version
   if [[ ! $go_version ]]; then
-    go_version="1.5.3"
+    go_version="1.6.2"
   fi
   mkdir -p ~/go
   if [ ! -d ~/go/$go_version ]; then
