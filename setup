@@ -2,29 +2,29 @@
 
 TOOLS=( setup_homebrew setup_zsh setup_vim setup_rubygems setup_go import_dot_files )
 
-import_dot_files() {
-  touch ~/.hushlogin
-  echo "gem: --no-document --no-user-install" > ~/.gemrc
-  cp files/.gitconfig ~
-  cp files/.tmux.conf ~
-  cp files/.tigrc ~
-  cp files/crap.zsh ~/.oh-my-zsh/custom/
-  cp files/simple.zsh-theme ~/.oh-my-zsh/custom/themes/
-  cp files/righthand.zsh-theme ~/.oh-my-zsh/custom/themes/
-  cp files/rbenv.zsh ~/.oh-my-zsh/custom/
-  cp files/go.zsh ~/.oh-my-zsh/custom/
-  cp files/direnv.zsh ~/.oh-my-zsh/custom/
-  cp files/monochrome.vim ~/.vim/colors/
-  cp files/chalk.vim ~/.vim/colors/
-  cp crypt /usr/local/bin/
-  splice
+automagic() {
+  echo -e "1: interactive setup - choose which tools you install"
+  echo -e "2: automagic setup - install everything, no questions asked"
+  read -n 1 -s -p "your choice? " choice
+  if [[ $choice == "1" ]]; then
+    echo $choice
+    for i in "${TOOLS[@]}"; do check $i; done
+  elif [[ $choice == "2" ]]; then
+    echo $choice
+    for i in "${TOOLS[@]}"; do $i; done
+    echo "automagic setup completed."
+  fi
 }
 
-splice() {
-  sed -i '' "s/$(ag ZSH_THEME ~/.zshrc | cut -d '=' -f 2)/\"righthand\"/g" ~/.zshrc
-  awk -i inplace "{ gsub(/callisto/, \"$(whoami)\") }; { print }" ~/.oh-my-zsh/custom/go.zsh
-  sed -i '' "s/$(ag ^plugins ~/.zshrc | cut -d "(" -f 2 | cut -d ")" -f 1)/git tmux rbenv/g" ~/.zshrc
-  vim -u NONE -c "helptags ~/.vim/bundle/vim-fugitive/doc" -c q # don't know where to put this yet - for now does no harm here
+check() {
+  read -n 1 -p "$1? (y/n) " choice
+  if [[ $choice == "y" ]]; then
+    echo -e "\n"
+    $1
+    echo -e "\n$1 completed\n"
+  else
+    echo -e "\nskipping step: setup $1\n"
+  fi
 }
 
 setup_homebrew() {
@@ -115,12 +115,22 @@ setup_go() {
   fi
 }
 
-osx-config() {
-  ./osx_config
-}
-
-install_apps() {
-  ./apps
+import_dot_files() {
+  touch ~/.hushlogin
+  echo "gem: --no-document --no-user-install" > ~/.gemrc
+  cp files/.gitconfig ~
+  cp files/.tmux.conf ~
+  cp files/.tigrc ~
+  cp files/crap.zsh ~/.oh-my-zsh/custom/
+  cp files/simple.zsh-theme ~/.oh-my-zsh/custom/themes/
+  cp files/righthand.zsh-theme ~/.oh-my-zsh/custom/themes/
+  cp files/rbenv.zsh ~/.oh-my-zsh/custom/
+  cp files/go.zsh ~/.oh-my-zsh/custom/
+  cp files/direnv.zsh ~/.oh-my-zsh/custom/
+  cp files/monochrome.vim ~/.vim/colors/
+  cp files/chalk.vim ~/.vim/colors/
+  cp crypt /usr/local/bin/
+  splice
 }
 
 work_email() {
