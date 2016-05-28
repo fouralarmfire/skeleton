@@ -143,8 +143,8 @@ work_email() {
 personal_email() {
   read -p "enter the username associated with your personal github account:" name
   read -p "enter the email address associated with your personal github account:" email
-  sed -i '' "s/GITHUB_EMAIL/$email/g" ~/.gitconfig
-  sed -i '' "s/GITHUB_USERNAME/$name/g" ~/.gitconfig
+  sed -i '' "s/GITHUB_EMAIL/$email/g" ~/.oh-my-zsh/custom/crap.zsh
+  sed -i '' "s/GITHUB_USERNAME/$name/g" ~/.oh-my-zsh/custom/crap.zsh
 }
 
 splice() {

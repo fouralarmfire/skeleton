@@ -15,6 +15,7 @@ alias gc='git commit'
 alias gpr="git pull --rebase"
 alias gti="git"
 alias work="git config user.email 'WORK_EMAIL' && git config user.name 'WORK_USERNAME'"
+alias fire="git config user.email 'GITHUB_EMAIL' && git config user.name 'GITHUB_USERNAME'"
 
 alias b="bosh"
 alias bsoh="bosh"
