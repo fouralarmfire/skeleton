@@ -13,7 +13,7 @@
 
 [core]
   pager = "less -FRX"
-	excludesfile = /Users/callisto/.gitignore
+	excludesfile = /Users/IDENTITY/.gitignore
 [url "git@github.com:"]
 	insteadOf = https://github.com/
 [rebase]

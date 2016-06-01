@@ -148,8 +148,8 @@ personal_email() {
 }
 
 splice() {
+  sed -i '' "s/IDENTITY/$(whoami)/g" ~/.gitconfig ~/.tmux.conf ~/.oh-my-zsh/custom/go.zsh
   sed -i '' "s/$(ag ZSH_THEME ~/.zshrc | cut -d '=' -f 2)/\"righthand\"/g" ~/.zshrc
-  awk -i inplace "{ gsub(/callisto/, \"$(whoami)\") }; { print }" ~/.oh-my-zsh/custom/go.zsh
   sed -i '' "s/$(ag ^plugins ~/.zshrc | cut -d "(" -f 2 | cut -d ")" -f 1)/git tmux rbenv/g" ~/.zshrc
   vim -u NONE -c "helptags ~/.vim/bundle/vim-fugitive/doc" -c q # don't know where to put this yet - for now does no harm here
   work_email
