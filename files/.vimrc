@@ -35,6 +35,10 @@ set hlsearch
 set ai
 set si
 
+set backupdir=~/.vim/backup_files//
+set directory=~/.vim/swap_files//
+set undodir=~/.vim/undo_files//
+
 set showmatch
 set mat=2
 
@@ -74,6 +78,7 @@ set background=dark
 colorscheme chalk
 
 let g:airline#extensions#tabline#enabled = 1
+let g:go_fmt_command = "goimports"
 
 autocmd StdinReadPre 8 let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif

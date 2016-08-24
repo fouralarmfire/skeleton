@@ -13,6 +13,7 @@ alias t="tig --all"
 alias gpc="git pair-commit -v"
 alias gc='git commit'
 alias gpr="git pull --rebase"
+alias gsu="git submodule update --init --recursive"
 alias gti="git"
 alias work="git config user.email 'WORK_EMAIL' && git config user.name 'WORK_USERNAME'"
 alias fire="git config user.email 'GITHUB_EMAIL' && git config user.name 'GITHUB_USERNAME'"
